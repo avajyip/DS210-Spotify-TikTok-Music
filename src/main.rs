@@ -48,8 +48,8 @@ fn tracklist(vals: &Vec<(String, f64, f64, f64, f64, f64)>) -> Vec<String> {
     return result;
 }
 
-fn select_random_sample(vals: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
-    let n = vals.len();
+fn select_random_sample(pts: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
+    let n = pts.len();
     let mut result: Vec<Vec<f64>> = Vec::new();
     let mut indices: Vec<usize> = Vec::new();
     let mut count = 0;
@@ -61,27 +61,62 @@ fn select_random_sample(vals: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
         }
     }
     for i in indices {
-        result.push(vals[i].clone());
+        result.push(pts[i].clone());
     }
     return result;
 }
 
 fn distance(node1: Vec<f64>, node2: Vec<f64>) -> f64 {
     let mut squared_distance: f64 = 0.0;
-    for i in 0..5 {
+    let n = node1.len();
+    for i in 0..n {
         let x = node1[i] - node2[i];
         squared_distance += x.powf(2.0);
     }
     return squared_distance.sqrt();
 }
 
-/*fn average_distance() {
-
-}*/
+fn average_distance(pts: &Vec<Vec<f64>>) -> f64 {
+    let mut sum = 0.0;
+    let n = pts.len();
+    let num_pairings = (n * (n-1)) / 2;
+    for i in 0..n {
+        for j in (i+1)..n {
+            sum += distance(pts[i].to_vec(), pts[j].to_vec());
+        }
+    }
+    return sum/(num_pairings as f64);
+}
 
 fn main() {
     let data = read_file("TikTok_songs_2019.tsv");
     let nodes = create_nodes(&data);
     let _tracklist = tracklist(&data);
     let sample = select_random_sample(&nodes);
+    let avg = average_distance(&sample);
+
+    /*println!("ALL:");
+    for node1 in &nodes {
+        for node2 in &nodes {
+            if node1 == node2 {
+                continue;
+            } else {
+                let dist = distance((node1).to_vec(), (node2).to_vec());
+                println!("{}", dist);
+            }
+        }
+    }
+
+    println!("SAMPLE:");
+    for node1 in &sample {
+        for node2 in &sample {
+            if node1 == node2 {
+                continue;
+            } else {
+                let dist = distance((node1).to_vec(), (node2).to_vec());
+                println!("{}", dist);
+            }
+        }
+    }*/
+    println!("{}", avg);
 }
