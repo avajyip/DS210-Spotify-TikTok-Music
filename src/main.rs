@@ -66,12 +66,29 @@ fn create_attribute_nodes(songs: &Vec<Song>) -> Vec<Vec<f64>> {
     return result;
 }
 
-fn tracklist(songs: &Vec<Song>) -> Vec<String> {
+fn get_tracklist(songs: &Vec<Song>) -> Vec<String> {
     let mut result: Vec<String> = Vec::new();
     for song in songs {
         result.push(song.title.clone());
     }
     return result;
+}
+
+fn get_song_title(songs: &Vec<Song>, attributes: &Vec<f64>) -> String {
+    for song in songs {
+        if song.danceability == attributes[0] {
+            if song.energy == attributes[1] {
+                if song.loudness == attributes[2] {
+                    if song.valence == attributes[3] {
+                        if song.tempo == attributes[4] {
+                            return song.title.clone();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "NA".to_string();
 }
 
 fn select_random_sample(pts: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
@@ -114,17 +131,38 @@ fn average_distance(pts: &Vec<Vec<f64>>) -> f64 {
     return sum/(num_pairings as f64);
 }
 
+fn max_distance(pts: &Vec<Vec<f64>>) -> (f64, Vec<f64>, Vec<f64>) {
+    let mut max = 0.0;
+    let mut max_pt1: Vec<f64> = Vec::new();
+    let mut max_pt2: Vec<f64> = Vec::new();
+    let n = pts.len();
+    for i in 0..n {
+        for j in (i+1)..n {
+            let dist = distance(pts[i].to_vec(), pts[j].to_vec());
+            if dist > max {
+                max = dist;
+                max_pt1 = pts[i].to_vec();
+                max_pt2 = pts[j].to_vec();
+            }
+        }
+    }
+    return (max, max_pt1, max_pt2);
+}
+
 fn main() {
     let tiktok2019 = read_tiktok_file("TikTok_songs_2019.tsv");
-    let tiktok2020 = read_tiktok_file("TikTok_songs_2020.tsv");
-    let tiktok2021 = read_tiktok_file("TikTok_songs_2021.tsv");
-    let tiktok2022 = read_tiktok_file("TikTok_songs_2022.tsv");
-    let spotify = read_spotify_file("Spotify_top_charts.tsv");
+    //let tiktok2020 = read_tiktok_file("TikTok_songs_2020.tsv");
+    //let tiktok2021 = read_tiktok_file("TikTok_songs_2021.tsv");
+    //let tiktok2022 = read_tiktok_file("TikTok_songs_2022.tsv");
+    //let spotify = read_spotify_file("Spotify_top_charts.tsv");
 
     let nodes = create_attribute_nodes(&tiktok2019);
-    let _tracklist = tracklist(&tiktok2019);
+    let _tracklist = get_tracklist(&tiktok2019);
     let sample = select_random_sample(&nodes);
     let avg = average_distance(&sample);
+    let max = max_distance(&nodes);
+    let song1 = get_song_title(&tiktok2019, &max.1);
 
-    println!("{}", avg); 
+    println!("{:?}", max);
+    println!("{:?}", song1); 
 }
