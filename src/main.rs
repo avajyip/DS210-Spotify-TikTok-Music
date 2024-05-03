@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::prelude::*;
-use rand::Rng;
 mod song;
 use song::*;
 
@@ -18,11 +17,11 @@ fn read_tiktok_file(path: &str) -> Vec<Song> {
             let name = v[0].parse::<String>().unwrap();
             let danceability = v[5].parse::<f64>().unwrap();
             let energy = v[6].parse::<f64>().unwrap();
-            let loudness = v[7].parse::<f64>().unwrap();
+            let speechiness = v[10].parse::<f64>().unwrap();
             let valence = v[14].parse::<f64>().unwrap();
-            let tempo = v[15].parse::<f64>().unwrap();
+            let tempo = (v[15].parse::<f64>().unwrap())/250.0;
             
-            result.push(Song::create_song(&name, &danceability, &energy, &loudness, &valence, &tempo));
+            result.push(Song::create_song(&name, &danceability, &energy, &speechiness, &valence, &tempo));
         }
     }
     return result;
@@ -42,111 +41,14 @@ fn read_spotify_file(path: &str) -> Vec<Song> {
             let name = v[1].parse::<String>().unwrap();
             let danceability = v[6].parse::<f64>().unwrap();
             let energy = v[7].parse::<f64>().unwrap();
-            let loudness = v[9].parse::<f64>().unwrap();
+            let speechiness = v[11].parse::<f64>().unwrap();
             let valence = v[15].parse::<f64>().unwrap();
-            let tempo = v[16].parse::<f64>().unwrap();
+            let tempo = (v[16].parse::<f64>().unwrap())/250.0;
             
-            result.push(Song::create_song(&name, &danceability, &energy, &loudness, &valence, &tempo));
+            result.push(Song::create_song(&name, &danceability, &energy, &speechiness, &valence, &tempo));
         }
     }
     return result;
-}
-
-fn create_attribute_nodes(songs: &Vec<Song>) -> Vec<Vec<f64>> {
-    let mut result: Vec<Vec<f64>> = Vec::new();
-    for song in songs {
-        let mut coordinates: Vec<f64> = Vec::new();
-        coordinates.push(song.danceability);
-        coordinates.push(song.energy);
-        coordinates.push(song.loudness);
-        coordinates.push(song.valence);
-        coordinates.push(song.tempo);
-        result.push(coordinates);
-    }
-    return result;
-}
-
-fn get_tracklist(songs: &Vec<Song>) -> Vec<String> {
-    let mut result: Vec<String> = Vec::new();
-    for song in songs {
-        result.push(song.title.clone());
-    }
-    return result;
-}
-
-fn get_song_title(songs: &Vec<Song>, attributes: &Vec<f64>) -> String {
-    for song in songs {
-        if song.danceability == attributes[0] {
-            if song.energy == attributes[1] {
-                if song.loudness == attributes[2] {
-                    if song.valence == attributes[3] {
-                        if song.tempo == attributes[4] {
-                            return song.title.clone();
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return "NA".to_string();
-}
-
-fn select_random_sample(pts: &Vec<Vec<f64>>, num_samples: &usize) -> Vec<Vec<f64>> {
-    let n = pts.len();
-    let mut result: Vec<Vec<f64>> = Vec::new();
-    let mut indices: Vec<usize> = Vec::new();
-    let mut count = 0;
-    while count < *num_samples {
-        let x = rand::thread_rng().gen_range(0..n);
-        if !indices.contains(&x) {
-            indices.push(x);
-            count += 1;
-        }
-    }
-    for i in indices {
-        result.push(pts[i].clone());
-    }
-    return result;
-}
-
-fn distance(node1: Vec<f64>, node2: Vec<f64>) -> f64 {
-    let mut squared_distance: f64 = 0.0;
-    let n = node1.len();
-    for i in 0..n {
-        let x = node1[i] - node2[i];
-        squared_distance += x.powf(2.0);
-    }
-    return squared_distance.sqrt();
-}
-
-fn average_distance(pts: &Vec<Vec<f64>>) -> f64 {
-    let mut sum = 0.0;
-    let n = pts.len();
-    let num_pairings = (n * (n-1)) / 2;
-    for i in 0..n {
-        for j in (i+1)..n {
-            sum += distance(pts[i].to_vec(), pts[j].to_vec());
-        }
-    }
-    return sum/(num_pairings as f64);
-}
-
-fn max_distance(pts: &Vec<Vec<f64>>) -> (f64, Vec<f64>, Vec<f64>) {
-    let mut max = 0.0;
-    let mut max_pt1: Vec<f64> = Vec::new();
-    let mut max_pt2: Vec<f64> = Vec::new();
-    let n = pts.len();
-    for i in 0..n {
-        for j in (i+1)..n {
-            let dist = distance(pts[i].to_vec(), pts[j].to_vec());
-            if dist > max {
-                max = dist;
-                max_pt1 = pts[i].to_vec();
-                max_pt2 = pts[j].to_vec();
-            }
-        }
-    }
-    return (max, max_pt1, max_pt2);
 }
 
 fn main() {
@@ -207,5 +109,6 @@ fn main() {
             avg_spotify, max_dist_spotify, get_song_title(&spotify, &i_spotify), get_song_title(&spotify, &j_spotify));
 
     let tiktok_total_avg = (avg19 + avg20 + avg21 + avg22)/4.0;
-    println!("tiktok avg: {}\nspotify avg: {}", tiktok_total_avg, avg_spotify);
+    println!("\nTOTAL AVG COMPARISON:
+            \ntiktok avg: {}\nspotify avg: {}", tiktok_total_avg, avg_spotify);
 }
