@@ -15,6 +15,7 @@ impl Song {
     }
 }
 
+// creates nodes for each song with values of danceability, energy, speechiness, valence, and tempo
 pub fn create_attribute_nodes(songs: &Vec<Song>) -> Vec<Vec<f64>> {
     let mut result: Vec<Vec<f64>> = Vec::new();
     for song in songs {
@@ -29,23 +30,7 @@ pub fn create_attribute_nodes(songs: &Vec<Song>) -> Vec<Vec<f64>> {
     return result;
 }
 
-pub fn get_song_title(songs: &Vec<Song>, attributes: &Vec<f64>) -> String {
-    for song in songs {
-        if song.danceability == attributes[0] {
-            if song.energy == attributes[1] {
-                if song.speechiness == attributes[2] {
-                    if song.valence == attributes[3] {
-                        if song.tempo == attributes[4] {
-                            return song.title.clone();
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return "NA".to_string();
-}
-
+// from list of nodes, selects random sample of given size
 pub fn select_random_sample(pts: &Vec<Vec<f64>>, num_samples: &usize) -> Vec<Vec<f64>> {
     let n = pts.len();
     let mut result: Vec<Vec<f64>> = Vec::new();
@@ -64,6 +49,7 @@ pub fn select_random_sample(pts: &Vec<Vec<f64>>, num_samples: &usize) -> Vec<Vec
     return result;
 }
 
+// finds distance between two nodes
 pub fn distance(node1: Vec<f64>, node2: Vec<f64>) -> f64 {
     let mut squared_distance: f64 = 0.0;
     let n = node1.len();
@@ -74,6 +60,7 @@ pub fn distance(node1: Vec<f64>, node2: Vec<f64>) -> f64 {
     return squared_distance.sqrt();
 }
 
+// finds average distance between a list of nodes
 pub fn average_distance(pts: &Vec<Vec<f64>>) -> f64 {
     let mut sum = 0.0;
     let n = pts.len();
@@ -86,6 +73,7 @@ pub fn average_distance(pts: &Vec<Vec<f64>>) -> f64 {
     return sum/(num_pairings as f64);
 }
 
+// returns distance between the two farthest points and the coordinates of the two points
 pub fn max_distance(pts: &Vec<Vec<f64>>) -> (f64, Vec<f64>, Vec<f64>) {
     let mut max = 0.0;
     let mut max_pt1: Vec<f64> = Vec::new();
@@ -102,4 +90,22 @@ pub fn max_distance(pts: &Vec<Vec<f64>>) -> (f64, Vec<f64>, Vec<f64>) {
         }
     }
     return (max, max_pt1, max_pt2);
+}
+
+// given an attribute node and list of Songs, find name of song corresponding with attribute node
+pub fn get_song_title(songs: &Vec<Song>, attributes: &Vec<f64>) -> String {
+    for song in songs {
+        if song.danceability == attributes[0] {
+            if song.energy == attributes[1] {
+                if song.speechiness == attributes[2] {
+                    if song.valence == attributes[3] {
+                        if song.tempo == attributes[4] {
+                            return song.title.clone();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "NA".to_string();
 }
