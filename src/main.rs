@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
+use is_close::is_close;
 mod song;
 use song::*;
 
@@ -98,4 +99,31 @@ fn main() {
     } else {
         println!("TikTok viral songs are, on average, less similar than Spotify Top Charts songs.")
     }
+
+    // TESTS
+
+    // distance() function
+    let pt1 = vec![0.0, 0.0];
+    let pt2 = vec![1.0, 1.0];
+    let dist_test = distance(pt1.clone(), pt2.clone()); //should equal √2 = 1.41421356
+    assert!(is_close!(dist_test, 1.41421356), "distance() function failed");
+
+    // average_distance() function
+    let pt3 = vec![2.0, 2.0];
+    let pt_vec: Vec<Vec<f64>> = vec![pt1, pt2, pt3];
+    let avg_dist_test = average_distance(&pt_vec); //should equal (√2 + √2 + √8) / 3 = 1.885618083
+    assert!(is_close!(avg_dist_test, 1.885618083), "average_distance() function failed");
+
+    // max_distance() function
+    let (max_dist_test, max_pt1_test, max_pt2_test) = max_distance(&pt_vec); //should equal √8=2.828427125, [0.0, 0.0], [2.0, 2.0])
+    assert!(is_close!(max_dist_test, 2.828427125), "max_distance() function failed (max distance value)");
+    assert_eq!(max_pt1_test, vec![0.0, 0.0], "max_distance() function failed (first point)");
+    assert_eq!(max_pt2_test, vec![2.0, 2.0], "max_distance() function failed (second point)");
+    
+    // select_random_sample() function
+    let sample_test = select_random_sample(&pt_vec, &2); //should equal two of the following pts at random: [0.0, 0.0], [1.0, 1.0], [2.0, 2.0]
+    assert!(sample_test == vec![[0.0, 0.0], [1.0, 1.0]] || sample_test == vec![[1.0, 1.0], [0.0, 0.0]] 
+            || sample_test == vec![[0.0, 0.0], [2.0, 2.0]] || sample_test == vec![[2.0, 2.0], [0.0, 0.0]]
+            || sample_test == vec![[1.0, 1.0], [2.0, 2.0]] || sample_test == vec![[2.0, 2.0], [1.0, 1.0]], 
+            "select_random_sample() function failed");
 }
